@@ -44,6 +44,18 @@ function CodeBlock() {
       socketRef.current.emit('join', {
           roomId,
       });
+
+      socketRef.current.on(
+        'joined',
+        (socketId) => {
+          console.log('client: on joined, socketId: ', socketId, 'code', codeRef.current)
+        socketRef.current.emit('sync-code', {
+          code: codeRef.current,
+          socketId,
+          });
+       });
+
+
     }
     init();
   }, [navigate]);
@@ -88,6 +100,24 @@ function CodeBlock() {
     };
     
   });
+
+  useEffect(() => {
+    if (socketRef.current) {
+        socketRef.current.on('code-change', ({code}) => {
+          console.log('code in client:', code);
+            if (code !== null) {
+                editorRef.current.setValue(code);
+            }
+        });
+    }
+
+    return () => {
+        if (socketRef.current) {
+            socketRef.current.off('code-change');
+        }
+    };
+}, [socketRef.current]);
+
 
   const getBlock = () => {
     axios.get(`${baseURL}/blocks/${blockId}`)
