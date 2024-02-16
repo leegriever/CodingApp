@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const { v4: uuidv4 } = require("uuid");
+const cookieParser = require("cookie-parser");
 const {Blocks} = require("./Blocks");
 app.use(express.json());
 const cors = require('cors');
@@ -14,9 +16,9 @@ const io = new Server(server);
 const {baseUrl} = require('../constants');
 
 const port = 3080;
-let mentorSocketId = null;
-let studentSocketId = null;
-let socketId = null;
+// let mentorSocketId = null;
+// let studentSocketId = null;
+// let socketId = null;
 
 app.use(express.json());
 
@@ -33,45 +35,33 @@ console.log("server 1");
 //   });
 
 io.on('connection', (socket) => {
-    console.log('Socket Connected ');
-    if (mentorSocketId == null){
-        mentorSocketId = socket.id;
-    }
-    else{
-        if (mentorSocketId != socket.id){
-            studentSocketId = socket.id;
+    console.log(`a user connected with socketId; ${socket.id}`);
+       socket.on('join', ({blockId, userId}) => {
+        // console.log(`a user connected with ${port}`);
+        socket.join(blockId);
+        Blocks[blockId-1].numberOfUsers += 1;
+        console.log("userId: ", userId);
+        if (Blocks[blockId-1].mentorUserId === null){
+            Blocks[blockId-1].mentorUserId = userId;
         }
-    }
-
-    socket.on('join', ({roomId}) => {
-        console.log('room id: ', roomId);
-        socket.join(roomId);
-        if (socket.id == studentSocketId){
-            socketId = mentorSocketId;
-        }
-        else {
-            socketId = studentSocketId;
-        }
-        console.log('socketId: ', socketId)
-        console.log('socket.id: ', socketId)
-
-        io.to(socketId).emit('joined'), {
-            socketId,
+        io.to(blockId).emit('joined'), {
+            socketId: socket.id,
         };
-        console.log('socket.id: ', socketId)
-
     });
-
     
     // for sync
-    socket.on('code-change', ({roomId, code}) => {
-        socket.in(roomId).emit('code-change', {code});
-        console.log('code: ', code, 'socketId::', socketId);
+    socket.on('code-change', ({blockId, code}) => {
+        console.log("code changed: ", code);
+        socket.to(blockId).emit('code-change', {code});
     });
 
     socket.on('sync-code', ({socketId, code}) => {
         io.to(socketId).emit('code-change', {code});
-        console.log('code: ', code, 'to: ', socketId);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected with socketId: ', socket.id);
+    });
     });
     /*
     // disconnecting from socket
@@ -101,13 +91,18 @@ io.on('connection', (socket) => {
             delete userSocketMap[leavingSocketId];
         }
     });*/
-});
 
+    
 
 
 
 app.get("/", cors(corsOptions), (req, res) => {
     res.send("Welcome to the server port!");
+});
+
+app.get("/user", cors(corsOptions), (req, res) => {
+    const userId = req.cookies?.userId || uuidv4();
+    res.cookie("userId", userId).send({id: userId});
 });
 
 app.get('/blocks', cors(corsOptions), (req, res) => {

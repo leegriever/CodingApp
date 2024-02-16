@@ -9,6 +9,7 @@ function App() {
   const baseURL = "http://localhost:3080";
 
   const [blocks, setBlocks] = useState([])
+  const [userId, setUserId] = useState([]);
 
   useEffect(() => {
     getBlocks();
@@ -18,6 +19,14 @@ const getBlocks = () => {
   axios.get(`${baseURL}/blocks`)
       .then((response) => setBlocks(response.data.Blocks))
       .catch((error) => console.error(error));
+}
+
+const getUser = () => {
+  axios.get(`${baseURL}/user`).then((response) => {
+      setUserId(response.data.id);
+  }).catch(error => {
+      console.log(error)
+  });
 }
 
   return (

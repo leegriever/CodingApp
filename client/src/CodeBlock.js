@@ -1,130 +1,72 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useNavigate, useParams} from "react-router-dom";
-import axios from 'axios';
 import {Button} from '@mui/material';
-
-import CodeMirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/dracula.css';
-import 'codemirror/theme/darcula.css';
-import 'codemirror/theme/nord.css';
-
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/edit/closebrackets';
-
+import Editor from './Editor';
 import {initSocket} from './socket';
+import axios from 'axios';
 
 function CodeBlock() {
 
-  const socketRef = useRef(null);
+  const socket = useRef(null);
   const codeRef = useRef(null);
   const {blockId} = useParams();
   const navigate = useNavigate();
-  const editorRef = useRef(null);
-  const roomId = 1;
 
-  const [block, setBlock] = useState([]);
+  const [userId, setUserId] = useState([]);
+  
 
   const baseURL = "http://localhost:3080";
-
-
+ 
+  const getUser = () => {
+    axios.get(`${baseURL}/user`).then((response) => {
+        setUserId(response.data.id);
+    }).catch(error => {
+        console.log(error)
+    });
+}
   useEffect(() => {
     // init socket
     const init = async () => {
-      socketRef.current = await initSocket();
-      socketRef.current.on('connect_error', (err) => handleErrors(err));
-      socketRef.current.on('connect_failed', (err) => handleErrors(err));
+      
+      getUser();
+      console.log("userId in codeblocke: ", userId);
+      socket.current = await initSocket();
+      socket.current.on('connect_error', (err) => handleErrors(err));
+      socket.current.on('connect_failed', (err) => handleErrors(err));
 
       function handleErrors(e) {
           console.log('socket error', e);
           navigate('/');
       }
 
-      socketRef.current.emit('join', {
-          roomId,
+      socket.current.emit('join', {
+        blockId,
+        userId,
       });
 
-      socketRef.current.on(
+      socket.current.on(
         'joined',
         (socketId) => {
-          console.log('client: on joined, socketId: ', socketId, 'code', codeRef.current)
-        socketRef.current.emit('sync-code', {
-          code: codeRef.current,
-          socketId,
-          });
+          socket.current.emit('sync-code', {
+            code: codeRef.current,
+            blockId,
+            });
        });
-
-
+       
     }
     init();
-  }, [navigate]);
 
-  useEffect(() => {
-    getBlock();
-  });
-
-  useEffect(() => {
-    // Initialize CodeMirror instance
-      const textarea = document.getElementById('realtimeEditor');
-      editorRef.current = CodeMirror.fromTextArea(textarea, {
-          mode: 'javascript',
-          theme: 'nord',
-          autoCloseTags: true,
-          autoCloseBrackets: true,
-          lineNumbers: true,
-      });
-
-
-      // Handle local code changes and emit to other clients
-      const handleCodeChange = (instance, changes) => {
-        const {origin} = changes;
-        const code = instance.getValue();
-        console.log(code)
-
-        codeRef.current = code;
-
-        // Emit the code change to other clients in the same room
-        if (origin !== 'setValue' && socketRef.current) {
-            socketRef.current.emit('code-change', {
-                roomId,
-                code,
-            });
-        }
-    };
-    editorRef.current.on('change', handleCodeChange);
-
+    // listener cleaning function
     return () => {
-      editorRef.current.off('change', handleCodeChange);
-      editorRef.current.toTextArea(); // Clean up the CodeMirror instance
-    };
-    
-  });
-
-  useEffect(() => {
-    if (socketRef.current) {
-        socketRef.current.on('code-change', ({code}) => {
-          console.log('code in client:', code);
-            if (code !== null) {
-                editorRef.current.setValue(code);
-            }
-        });
-    }
-
-    return () => {
-        if (socketRef.current) {
-            socketRef.current.off('code-change');
-        }
-    };
-}, [socketRef.current]);
-
-
-  const getBlock = () => {
-    axios.get(`${baseURL}/blocks/${blockId}`)
-        .then((response) => setBlock(response.data.block))
-        .catch((error) => console.error(error));
+      if (socket.current) {
+          socket.current.disconnect();
+          socket.current.off('joined');
+      }
   }
 
+  }, [navigate, blockId, userId]);
+
+  
   const onLobbyBtn = () => {
       navigate('/')
   }
@@ -132,9 +74,14 @@ function CodeBlock() {
     return (
       <div>
         <h1>Code Block</h1>
-        <textarea id="realtimeEditor"></textarea>
+        <Editor
+          socket={socket}
+          blockId={blockId}
+          userId = {userId}
+          onCodeChange={(code) => {codeRef.current = code}}
+        />
         <Button variant="contained" disableElevation
-        onClick={() => onLobbyBtn(block.id)}
+        onClick={() => onLobbyBtn()}
         >
         Back To Lobby
         </Button>
