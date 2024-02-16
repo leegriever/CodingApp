@@ -19,8 +19,8 @@ function Editor({socket, blockId, userId, onCodeChange}) {
 
     useEffect(() => {
         getBlock();
-        console.log("mentorUserId: ", block.mentorUserId);
-        console.log("userId: ", userId);
+        // console.log("mentorUserId: ", block.mentorUserId);
+        // console.log("userId: ", userId);
         // Initialize CodeMirror instance
         const textarea = document.getElementById('realtimeEditor');
         editor.current = CodeMirror.fromTextArea(textarea, {

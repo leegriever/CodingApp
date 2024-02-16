@@ -5,14 +5,14 @@ import Lobby from './Lobby';
 import CodeBlock from './CodeBlock';
 
 function App() {
-  axios.defaults.withCredentials = true;
   const baseURL = "http://localhost:3080";
 
-  const [blocks, setBlocks] = useState([])
+  const [blocks, setBlocks] = useState([]);
   const [userId, setUserId] = useState([]);
 
   useEffect(() => {
     getBlocks();
+    getUser();
   }, []);
 
 const getBlocks = () => {
@@ -22,6 +22,7 @@ const getBlocks = () => {
 }
 
 const getUser = () => {
+  console.log('in getUser');
   axios.get(`${baseURL}/user`).then((response) => {
       setUserId(response.data.id);
   }).catch(error => {
@@ -45,6 +46,7 @@ const getUser = () => {
                         path="/block/:blockId"
                         element={
                             <CodeBlock
+                            userId = {userId}
                             />
                         }
                     />
