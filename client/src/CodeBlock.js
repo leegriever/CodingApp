@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {useNavigate, useParams} from "react-router-dom";
 import {Button} from '@mui/material';
-import Editor from './Editor';
 import { socket } from './socket';
 
 
