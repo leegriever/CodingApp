@@ -22,7 +22,6 @@ const getBlocks = () => {
 }
 
 const getUser = () => {
-  console.log('in getUser');
   axios.get(`${baseURL}/user`).then((response) => {
       setUserId(response.data.id);
   }).catch(error => {

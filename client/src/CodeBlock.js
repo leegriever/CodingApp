@@ -4,30 +4,37 @@ import {Button} from '@mui/material';
 import Editor from './Editor';
 import { socket } from './socket';
 
+
+import CodeMirror from 'codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/theme/nord.css';
+
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/addon/edit/closetag';
+import 'codemirror/addon/edit/closebrackets';
+
 function CodeBlock({userId}) {
 
   // const socket = useRef(null);
-  const codeRef = useRef(null);
+  // const codeRef = useRef(null);
+  const editor = useRef(null);
   const {blockId} = useParams();
   const navigate = useNavigate();
-
   
   console.log("userID in codeBlock: ", userId);
     
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [fooEvents, setFooEvents] = useState([]);
+  // const [userRole, setUserRole] = useState([]);
+
 
   useEffect(() => {
     console.log('in codeblock useeffect')
     function onConnect() {
       console.log('connect')
-      socket.emit('send_user', {userId, blockId});
       setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      console.log('disconnect')
-      setIsConnected(false);
+      socket.emit('join_user', {userId, blockId});
     }
 
     // function onFooEvent(value) {
@@ -35,6 +42,7 @@ function CodeBlock({userId}) {
     // }
 
     socket.on('connect', onConnect);
+    socket.on('joined', {})
     socket.on('disconnect', onDisconnect);
     // socket.on('foo', onFooEvent);
 
@@ -44,6 +52,48 @@ function CodeBlock({userId}) {
       // socket.off('foo', onFooEvent);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("userId in editor: ", userId);
+    //Initialize CodeMirror instance
+    const textarea = document.getElementById('realtimeEditor');
+    editor.current = CodeMirror.fromTextArea(textarea, {
+        mode: 'javascript',
+        theme: 'nord',
+        autoCloseTags: true,
+        autoCloseBrackets: true,
+        lineNumbers: true,
+        // readOnly: block.mentorUserId === userId,
+    });
+
+    // Handle local code changes and emit to other clients
+    const handleCodeChange = (instance, changes) => {
+        const {origin} = changes;
+        const code = instance.getValue();
+        
+        console.log('code is: ', code)
+        // codeRef.current = code;
+        // console.log('codeRef is: ', codeRef.current)
+        
+        console.log('origin is: ', origin)
+        console.log('socketid is: ', socket.current)
+        // Emit the code change to other clients in the same block
+        if (origin !== 'setValue' && socket) {
+            console.log('code emit: ', code)
+            socket.emit('code-change', {
+                blockId,
+                code,
+            });
+        }
+    };
+
+    editor.current.on('change', handleCodeChange);
+
+    return () => {
+        editor.current.off('change', handleCodeChange);
+        editor.current.toTextArea(); // Clean up the CodeMirror instance
+    };
+}, []);
 
 
   // useEffect(() => {
@@ -86,20 +136,20 @@ function CodeBlock({userId}) {
 
   // }, [navigate, blockId]);
 
-  
+  function onDisconnect() {
+    console.log('disconnect')
+    setIsConnected(false);
+  }
+
   const onLobbyBtn = () => {
+      onDisconnect()
       navigate('/')
   }
 
     return (
       <div>
         <h1>Code Block</h1>
-        <Editor
-          socket={socket}
-          blockId={blockId}
-          userId = {userId}
-          onCodeChange={(code) => {codeRef.current = code}}
-        />
+        <textarea id="realtimeEditor"></textarea>
         <Button variant="contained" disableElevation
         onClick={() => onLobbyBtn()}
         >
