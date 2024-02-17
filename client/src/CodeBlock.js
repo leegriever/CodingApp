@@ -56,6 +56,7 @@ function CodeBlock() {
 
   function onCodeChange(code) {
     if (code !== null) {
+      console.log('ddd')
       editor.current.setValue(code);
     }
   }

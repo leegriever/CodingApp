@@ -10,7 +10,6 @@ function Lobby({blocks}) {
   const navigate = useNavigate();
   const onBlockClicked = (blockId) => {
     console.log('btn click')
-    socket.connect();
     navigate(`/block/${blockId}`);
     
   }
