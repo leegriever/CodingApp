@@ -25,13 +25,15 @@ function CodeBlock() {
     
   // const [isConnected, setIsConnected] = useState(socket.connected);
 
-  
+  useEffect(() => {
+    onConnect();
+  }, [blockId]);
 
   useEffect(() => {
     console.log('in codeblock useeffect')
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+    // socket.on('connect', onConnect);
+    // socket.on('disconnect', onDisconnect);
     socket.on('code-change', (code) => {onCodeChange(code.code)});
     socket.on('user-role', (role) => {onsetUserRole(role.role)});
 
@@ -41,60 +43,14 @@ function CodeBlock() {
     };
   }, []);
 
-
-
-
-
-  // useEffect(() => {
-    // console.log("userId in editor: ", userId, userRole);
-    // //Initialize CodeMirror instance
-    // const textarea = document.getElementById('realtimeEditor');
-    // editor.current = CodeMirror.fromTextArea(textarea, {
-    //     mode: 'javascript',
-    //     theme: 'nord',
-    //     autoCloseTags: true,
-    //     autoCloseBrackets: true,
-    //     lineNumbers: true,
-    //     // readOnly: block.mentorUserId === userId,
-    // });
-
-    // // Handle local code changes and emit to other clients
-    // const handleCodeChange = (instance, changes) => {
-    //     const {origin} = changes;
-    //     const code = instance.getValue();
-        
-    //     console.log('code is: ', code)
-        
-    //     console.log('origin is: ', origin)
-    //     console.log('socketid is: ', socket.current)
-
-    //     // Emit the code change to other clients in the same block
-    //     if (origin !== 'setValue' && socket) {
-    //         console.log('code emit: ', code)
-    //         socket.emit('code-change', {
-    //             blockId,
-    //             code,
-    //         });
-    //     }
-    // };
-
-    // editor.current.on('change', handleCodeChange);
-
-    // return () => {
-    //     editor.current.off('change', handleCodeChange);
-    //     editor.current.toTextArea(); // Clean up the CodeMirror instance
-    // };
-// }, []);
-
   function onConnect() {
-    console.log('connect')
-    // setIsConnected(true);
+    console.log('connect123')
+    socket.connect();
     socket.emit('user_joined', {userId, blockId});
   }
 
   function onDisconnect() {
     console.log('disconnect')
-    // setIsConnected(false);
 
   }
 
