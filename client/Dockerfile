@@ -6,7 +6,7 @@ WORKDIR /app
 
 # COPY public/ /app/public
 # COPY src/ /app/src
-COPY /package.json ./
+COPY /package*.json ./
 
 # Install dependencies
 RUN npm install
@@ -14,19 +14,19 @@ RUN npm install
 # Copy the remaining application code
 COPY . .
 
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
 
 # # Build the React app
 # RUN npm start
 
 # # Use a lightweight image for production
-# FROM nginx:alpine
+FROM nginx:alpine
 
 # # Copy built files from the 'build' directory to the NGINX server root
-# COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
 # # Expose port 80 to the outside world
-# EXPOSE 80
+EXPOSE 80
 
 # # Run NGINX in the foreground
-# CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]

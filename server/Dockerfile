@@ -1,20 +1,20 @@
-# Use an official Node.js runtime as the base image
-FROM node:alpine
+# Fetching the minified node image on apline linux
+FROM node:slim
 
-# Set the working directory in the container
-WORKDIR /app
+# Declaring env
+ENV NODE_ENV development
 
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+# Setting up the work directory
+WORKDIR /express-docker
 
-# Install dependencies
-RUN npm install
-
-# Copy the remaining application code
+# Copying all the files in our project
 COPY . .
 
-# Expose port 3000 to the outside world
-EXPOSE 3000
+# Installing dependencies
+RUN npm install
 
-# Command to run the backend server
-CMD ["npm", "start"]
+# Starting our application
+CMD [ "node", "index.js" ]
+
+# Exposing server port
+EXPOSE 5000
