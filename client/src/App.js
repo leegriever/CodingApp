@@ -12,21 +12,12 @@ function App() {
 
   useEffect(() => {
     getBlocks();
-    getUser();
   }, []);
 
 const getBlocks = () => {
   axios.get(`${baseURL}/blocks`)
       .then((response) => setBlocks(response.data.Blocks))
       .catch((error) => console.error(error));
-}
-
-const getUser = () => {
-  axios.get(`${baseURL}/user`).then((response) => {
-      setUserId(response.data.id);
-  }).catch(error => {
-      console.log(error)
-  });
 }
 
   return (
@@ -44,9 +35,7 @@ const getUser = () => {
                     <Route
                         path="/block/:blockId"
                         element={
-                            <CodeBlock
-                            userId = {userId}
-                            />
+                            <CodeBlock />
                         }
                     />
                 </Routes>

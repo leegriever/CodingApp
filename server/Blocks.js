@@ -4,28 +4,28 @@ const Blocks = [
         title: "Case 1",
         code: "Ross",
         mentorUserId: null,
-        numberOfUsers: 0
+        studentUserId: null,
     },
     {
         id: 2,
         title: "Case 2",
         code: "Rachel",
         mentorUserId: null,
-        numberOfUsers: 0
+        studentUserId: null,
     },
     {
         id: 3,
         title: "Case 3",
         code: "Monica",
         mentorUserId: null,
-        numberOfUsers: 0
+        studentUserId: null,
     },
     {
         id: 4,
         title: "Case 4",
         code: "Chandler",
         mentorUserId: null,
-        numberOfUsers: 0
+        studentUserId: null,
     },
 ]
 ;
