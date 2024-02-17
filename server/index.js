@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
         socket.join(blockId);
         role = assignUserRole(blockId, userId);
         console.log("user role: ", role);
-        io.to(blockId).emit('user-role', {role});
+        socket.emit('user-role', {role});
     });
 
     // for sync
