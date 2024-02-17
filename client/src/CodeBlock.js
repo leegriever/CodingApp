@@ -25,7 +25,6 @@ function CodeBlock({userId}) {
   console.log("userID in codeBlock: ", userId);
     
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [fooEvents, setFooEvents] = useState([]);
   // const [userRole, setUserRole] = useState([]);
 
 
@@ -34,17 +33,13 @@ function CodeBlock({userId}) {
     function onConnect() {
       console.log('connect')
       setIsConnected(true);
-      socket.emit('join_user', {userId, blockId});
+      socket.emit('user_joined', {userId, blockId});
     }
 
-    // function onFooEvent(value) {
-    //   setFooEvents(previous => [...previous, value]);
-    // }
-
     socket.on('connect', onConnect);
-    socket.on('joined', {})
+    // socket.on('joined', {})
     socket.on('disconnect', onDisconnect);
-    // socket.on('foo', onFooEvent);
+    socket.on('code-change', (code) => {onCodeChange(code.code)});
 
     return () => {
       socket.off('connect', onConnect);
@@ -89,11 +84,30 @@ function CodeBlock({userId}) {
 
     editor.current.on('change', handleCodeChange);
 
+
+
     return () => {
         editor.current.off('change', handleCodeChange);
         editor.current.toTextArea(); // Clean up the CodeMirror instance
+      
     };
 }, []);
+
+// useEffect(() => {
+//   socket.on('code-change', ({code}) => {
+//     console.log('code recived: ', code);
+//     if (code !== null) {
+//         editor.current.setValue(code);
+        
+//     }
+//   });
+
+//   return () => {
+//     if (socket) {
+//       socket.off('code-change');
+//   }
+//   };
+// });
 
 
   // useEffect(() => {
@@ -139,6 +153,14 @@ function CodeBlock({userId}) {
   function onDisconnect() {
     console.log('disconnect')
     setIsConnected(false);
+  }
+
+  function onCodeChange(code) {
+    if (code !== null) {
+      console.log('code changeg!!!!', code)
+      console.log('code changeg!!!!', typeof(code))
+      editor.current.setValue(code);
+    }
   }
 
   const onLobbyBtn = () => {

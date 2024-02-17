@@ -39,9 +39,9 @@ io.on('connection', (socket) => {
     //     };
     // });
 
-    socket.on('join_user', ({userId, blockId}) => {
+    socket.on('user_joined', ({userId, blockId}) => {
         console.log(`user: ${userId}} connected with block: ${blockId}`);
-        socket.join(blockId);
+        // socket.join(blockId);
         console.log("mentor id 1: ", Blocks[blockId-1].mentorUserId);
         if (Blocks[blockId-1].mentorUserId === null){
             Blocks[blockId-1].mentorUserId = userId;
@@ -52,7 +52,8 @@ io.on('connection', (socket) => {
     // for sync
     socket.on('code-change', ({blockId, code}) => {
         console.log("code changed: ", code);
-        socket.to(blockId).emit('code-change', {code});
+        console.log("send code", code, "to blockId: ", blockId);
+        io.emit('code-change', {code});
     });
 
     socket.on('sync-code', ({socketId, code}) => {
