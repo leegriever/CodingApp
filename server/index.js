@@ -11,8 +11,10 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 
-const {baseUrl} = require('../constants');
-
+const baseUrl = {
+    client: "http://localhost:3000",
+    server: "http://localhost:3080"
+};
 const port = 3080;
 
 app.use(express.json());
