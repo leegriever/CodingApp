@@ -8,7 +8,6 @@ function App() {
   const baseURL = "http://localhost:3080";
 
   const [blocks, setBlocks] = useState([]);
-  const [userId, setUserId] = useState([]);
 
   useEffect(() => {
     getBlocks();

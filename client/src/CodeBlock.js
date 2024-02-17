@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {useNavigate, useParams} from "react-router-dom";
 import {Button} from '@mui/material';
 import { socket } from './socket';
@@ -23,7 +23,6 @@ function CodeBlock() {
   const userRole = useRef(null);
   console.log("userID in codeBlock: ", userId);
     
-  // const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
     onConnect();
@@ -31,9 +30,6 @@ function CodeBlock() {
 
   useEffect(() => {
     console.log('in codeblock useeffect')
-
-    // socket.on('connect', onConnect);
-    // socket.on('disconnect', onDisconnect);
     socket.on('code-change', (code) => {onCodeChange(code.code)});
     socket.on('user-role', (role) => {onsetUserRole(role.role)});
 

@@ -1,8 +1,6 @@
 import React from 'react'
 import {useNavigate} from "react-router-dom";
 import {Box, List, ListItem, ListItemText, ListItemButton, ListItemIcon} from '@mui/material';
-import { socket } from './socket';
-import { io } from 'socket.io-client';
 
 
 function Lobby({blocks}) {
